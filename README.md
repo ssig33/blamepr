@@ -31,6 +31,9 @@ blamepr path/to/file.go:123
 
 # Open the PR in your default browser
 blamepr -open path/to/file.go:123
+
+# Output only the PR ID (for piping to other commands)
+blamepr -id path/to/file.go | xargs gh pr view
 ```
 
 ## Authentication

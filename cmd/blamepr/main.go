@@ -13,10 +13,11 @@ import (
 
 func main() {
 	openFlag := flag.Bool("open", false, "Open the PR in the default browser")
+	idOnlyFlag := flag.Bool("id", false, "Output only the PR ID number (for piping to other commands)")
 	flag.Parse()
 
 	if flag.NArg() != 1 {
-		fmt.Println("Usage: blamepr [-open] path/to/file.go[:line]")
+		fmt.Println("Usage: blamepr [-open] [-id] path/to/file.go[:line]")
 		os.Exit(1)
 	}
 
@@ -43,8 +44,14 @@ func main() {
 	}
 
 	// Output the PR information
-	fmt.Printf("PR #%d: %s\n", pr.Number, pr.Title)
-	fmt.Printf("URL: %s\n", pr.URL)
+	if *idOnlyFlag {
+		// Output only the PR ID for piping to other commands
+		fmt.Printf("%d\n", pr.Number)
+	} else {
+		// Output the full PR information
+		fmt.Printf("PR #%d: %s\n", pr.Number, pr.Title)
+		fmt.Printf("URL: %s\n", pr.URL)
+	}
 
 	// Open the PR in the browser if the -open flag is set
 	if *openFlag {
