@@ -34,6 +34,21 @@ blamepr -open path/to/file.go:123
 
 # Output only the PR ID (for piping to other commands)
 blamepr -id path/to/file.go | xargs gh pr view
+
+# View the PR in gh CLI with detail output
+blamepr -id path/to/file.go | xargs gh pr view -w
+```
+
+## Vim Integration
+
+Add the following to your `.vimrc` file:
+
+```vim
+" Open PR for current file at current line
+command! -nargs=0 BlamePR execute "!blamepr -open " . expand("%") . ":" . line(".")
+
+" View PR details for current file/line using gh CLI
+command! -nargs=0 BlamePRGh execute "!blamepr -id " . expand("%") . ":" . line(".") . " | xargs gh pr view"
 ```
 
 ## Authentication
