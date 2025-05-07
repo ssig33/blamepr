@@ -54,7 +54,7 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -o dist/blamepr-windows-amd64.exe ./cmd/blamepr
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/blamepr-linux-amd64
