@@ -63,8 +63,8 @@ command! -nargs=0 BlamePRGh execute "!blamepr -id " . expand("%") . ":" . line("
 2. Add your GitHub credentials to your `.netrc` file:
    ```
    machine github.com
-   login your_username
-   password your_github_token
+       login your_username
+       password your_github_token
    ```
 
 ## Requirements
