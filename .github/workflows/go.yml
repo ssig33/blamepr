@@ -30,7 +30,7 @@ jobs:
 
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,9 +56,23 @@ jobs:
           # Build for Windows
           GOOS=windows GOARCH=amd64 go build -o dist/blamepr-windows-amd64.exe ./cmd/blamepr
 
+      - name: Generate release name
+        id: release_name
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "name=dev-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+            echo "tag=dev-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+          else
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ steps.release_name.outputs.name }}
+          tag_name: ${{ steps.release_name.outputs.tag }}
+          prerelease: ${{ github.ref == 'refs/heads/main' }}
           files: |
             dist/blamepr-linux-amd64
             dist/blamepr-linux-arm64
