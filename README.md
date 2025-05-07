@@ -4,6 +4,8 @@ A command-line tool that maps source code lines or files to the GitHub Pull Requ
 
 ## Installation
 
+### Using Go
+
 ```bash
 # Install directly
 go install github.com/ssig33/blamepr/cmd/blamepr@latest
@@ -13,6 +15,10 @@ git clone https://github.com/ssig33/blamepr.git
 cd blamepr
 make install
 ```
+
+### Binary Downloads
+
+Pre-compiled binaries for Linux, macOS, and Windows are available on the [releases page](https://github.com/ssig33/blamepr/releases).
 
 ## Usage
 

@@ -1,0 +1,64 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21
+
+    - name: Build for multiple platforms
+      run: |
+        # Create output directory
+        mkdir -p dist
+        
+        # Build for Linux
+        GOOS=linux GOARCH=amd64 go build -o dist/blamepr-linux-amd64 ./cmd/blamepr
+        GOOS=linux GOARCH=arm64 go build -o dist/blamepr-linux-arm64 ./cmd/blamepr
+        
+        # Build for macOS
+        GOOS=darwin GOARCH=amd64 go build -o dist/blamepr-darwin-amd64 ./cmd/blamepr
+        GOOS=darwin GOARCH=arm64 go build -o dist/blamepr-darwin-arm64 ./cmd/blamepr
+        
+        # Build for Windows
+        GOOS=windows GOARCH=amd64 go build -o dist/blamepr-windows-amd64.exe ./cmd/blamepr
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/blamepr-linux-amd64
+          dist/blamepr-linux-arm64
+          dist/blamepr-darwin-amd64
+          dist/blamepr-darwin-arm64
+          dist/blamepr-windows-amd64.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
