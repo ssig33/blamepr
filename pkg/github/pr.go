@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
+	"github.com/jdx/go-netrc"
 	"github.com/ssig33/blamepr/pkg/git"
 )
 
@@ -79,27 +79,30 @@ func getGitHubToken() (string, error) {
 	}
 
 	// If not in the environment, try to get it from .netrc
-	netrcPath := filepath.Join(os.Getenv("HOME"), ".netrc")
-	data, err := os.ReadFile(netrcPath)
+	homeDir := os.Getenv("HOME")
+	netrcPath := filepath.Join(homeDir, ".netrc")
+	
+	// Use go-netrc to parse the .netrc file
+	n, err := netrc.Parse(netrcPath)
 	if err != nil {
-		return "", fmt.Errorf("GitHub token not found in environment or .netrc: %v", err)
+		return "", fmt.Errorf("failed to parse .netrc file: %v", err)
 	}
 
-	// Parse the .netrc file for the GitHub token
-	lines := strings.Split(string(data), "\n")
-	for i := 0; i < len(lines); i++ {
-		line := strings.TrimSpace(lines[i])
-		if strings.HasPrefix(line, "machine github.com") || strings.HasPrefix(line, "machine api.github.com") {
-			// Look for the password/token in the next few lines
-			for j := i + 1; j < len(lines) && j < i+5; j++ {
-				tokenLine := strings.TrimSpace(lines[j])
-				if strings.HasPrefix(tokenLine, "password") || strings.HasPrefix(tokenLine, "login") {
-					parts := strings.Fields(tokenLine)
-					if len(parts) >= 2 {
-						return parts[1], nil
-					}
-				}
-			}
+	// Try to get the password for github.com
+	githubMachine := n.Machine("github.com")
+	if githubMachine != nil {
+		password := githubMachine.Get("password")
+		if password != "" {
+			return password, nil
+		}
+	}
+
+	// Also try api.github.com
+	apiMachine := n.Machine("api.github.com")
+	if apiMachine != nil {
+		password := apiMachine.Get("password")
+		if password != "" {
+			return password, nil
 		}
 	}
 
