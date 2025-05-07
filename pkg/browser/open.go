@@ -13,12 +13,12 @@ func Open(url string) error {
 
 	switch runtime.GOOS {
 	case "linux":
-		// First try xdg-open (standard for most Linux distributions)
-		if _, err := exec.LookPath("xdg-open"); err == nil {
-			cmd = exec.Command("xdg-open", url)
-		} else if _, err := exec.LookPath("wslview"); err == nil {
-			// For Windows Subsystem for Linux
+		// First try wslview for Windows Subsystem for Linux
+		if _, err := exec.LookPath("wslview"); err == nil {
 			cmd = exec.Command("wslview", url)
+		} else if _, err := exec.LookPath("xdg-open"); err == nil {
+			// Fall back to xdg-open for other Linux distributions
+			cmd = exec.Command("xdg-open", url)
 		} else {
 			return fmt.Errorf("no suitable browser command found on Linux")
 		}
